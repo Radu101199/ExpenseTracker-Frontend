@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from "react";
-import type { Expense } from "../../types/Expense";
+import type { ExpenseDto } from "../types/expense";
 
-const ExpenseList: React.FC = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
+type ExpenseListProps = {
+  expenses: ExpenseDto[];
+};
 
-  useEffect(() => {
-    fetch("http://localhost:5168/api/Expense")
-      .then((res) => res.json())
-      .then((data) => {
-        setExpenses(data);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
+const ExpenseList = ({ expenses }: ExpenseListProps) => {
+  if (expenses.length === 0) {
+    return <p>No expenses yet.</p>;
+  }
 
   return (
     <div>

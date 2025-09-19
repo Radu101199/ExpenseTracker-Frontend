@@ -1,5 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import type { ExpenseInput } from "../types/expense";
+import { expenseSchema } from "../types/expense";
+
+
 
 interface ExpenseFormProps{
     onSubmit: (expense: ExpenseInput) => void;
@@ -34,6 +37,12 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const result = expenseSchema.safeParse(form);
+    if (!result.success) {
+        const firstError = Object.values(result.error.flatten().fieldErrors)[0]?.[0];
+        alert(firstError || "Invalid input");
+    return;
+    }
     onSubmit(form);
   };
 

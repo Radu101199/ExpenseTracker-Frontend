@@ -1,7 +1,7 @@
-// components/ui/ExpenseList.tsx
 import React, { useEffect, useState } from "react";
-import type { ExpenseDto, CreateExpenseInput, UpdateExpenseInput } from "../types/expense";
+import type { ExpenseDto } from "../types/expense";
 import ExpenseForm from "./ExpenseForm";
+import { getExpenses, createExpense, updateExpense, deleteExpense } from "../../services/expenseService";
 
 const ExpenseList: React.FC = () => {
   const [expenses, setExpenses] = useState<ExpenseDto[]>([]);
@@ -13,48 +13,42 @@ const ExpenseList: React.FC = () => {
   }, []);
 
   const fetchExpenses = async () => {
-    const res = await fetch("http://localhost:5168/api/Expense");
-    const data: ExpenseDto[] = await res.json();
-
-    // ✅ Normalize dates for UI (strip time part)
-    const normalized = data.map((expense) => ({
-      ...expense,
-      date: expense.date.split("T")[0], // keep only yyyy-MM-dd
-    }));
-
-    setExpenses(normalized);
-    setLoading(false);
+    try {
+      const data = await getExpenses();
+      // strip time part
+      const normalized = data.map((expense) => ({
+        ...expense,
+        date: expense.date.split("T")[0],
+      }));
+      setExpenses(normalized);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = async (
-    expense: CreateExpenseInput | UpdateExpenseInput,
-    id?: number
-  ) => {
-    console.log("Sending expense:", expense, "with id:", id);
-
-    if (id) {
-      // UPDATE
-      await fetch(`http://localhost:5168/api/Expense/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expense),
-      });
-    } else {
-      // CREATE
-      await fetch("http://localhost:5168/api/Expense", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expense),
-      });
+  const handleSubmit = async (expense: Omit<ExpenseDto, "id">, id?: number) => {
+    try {
+      if (id) {
+        await updateExpense(id, expense);
+      } else {
+        await createExpense(expense);
+      }
+      setEditingExpense(null);
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
     }
-
-    setEditingExpense(null);
-    fetchExpenses();
   };
 
   const handleDelete = async (id: number) => {
-    await fetch(`http://localhost:5168/api/Expense/${id}`, { method: "DELETE" });
-    fetchExpenses();
+    try {
+      await deleteExpense(id);
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) return <p>Loading...</p>;

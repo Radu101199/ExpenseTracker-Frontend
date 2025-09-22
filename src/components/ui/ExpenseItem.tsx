@@ -1,33 +1,25 @@
 import React from "react";
 import type { ExpenseInput } from "../types/expense";
 
-interface ExpenseItemProps {
+interface Props {
   expense: ExpenseInput & { id: number };
-  onEdit: (expense: ExpenseInput & { id: number }) => void;
+  onEdit: (e: ExpenseInput & { id: number }) => void;
   onDelete: (id: number) => void;
 }
 
-const ExpenseItem: React.FC<ExpenseItemProps> = ({ expense, onEdit, onDelete }) => {
+const ExpenseItem: React.FC<Props> = ({ expense, onEdit, onDelete }) => {
   return (
-    <div className="flex justify-between items-center border p-3 rounded mb-2">
+    <div className="flex justify-between items-start border rounded p-3 bg-white shadow-sm mb-3">
       <div>
-        <h3 className="font-bold">{expense.title}</h3>
-        <p>{expense.amount} RON - {new Date(expense.date).toLocaleDateString()}</p>
-        <small>Category: {expense.categoryId} | User: {expense.userId}</small>
+        <h3 className="font-semibold text-gray-800">{expense.title}</h3>
+        <p className="text-sm text-gray-600">{new Date(expense.date).toLocaleDateString()}</p>
+        <p className="mt-1 text-gray-700">{expense.amount.toFixed(2)} RON</p>
+        <div className="text-xs text-gray-500 mt-1">Cat: {expense.categoryId} • User: {expense.userId}</div>
       </div>
-      <div className="space-x-2">
-        <button
-          onClick={() => onEdit(expense)}
-          className="bg-yellow-500 text-white px-3 py-1 rounded"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => onDelete(expense.id)}
-          className="bg-red-600 text-white px-3 py-1 rounded"
-        >
-          Delete
-        </button>
+
+      <div className="flex flex-col gap-2">
+        <button onClick={() => onEdit(expense)} className="bg-yellow-400 text-white px-3 py-1 rounded hover:brightness-90">Edit</button>
+        <button onClick={() => onDelete(expense.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:brightness-90">Delete</button>
       </div>
     </div>
   );
